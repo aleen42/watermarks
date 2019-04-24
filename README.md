@@ -2,7 +2,9 @@
 
 <p align="center"><img src="./preview.png" alt="watermarks" /></p>
 
-A JavaScript component for creating watermarks with web technologies supported above IE11+. For more details around browsers compatibilities, please check the document, ["Web skills for creating watermarks"](https://codepen.io/aleen42/pen/VNEmjQ).
+<p align="center"><a href="https://codepen.io/aleen42/pen/VNEmjQ" target="_blank"><strong>[Demo]</strong></a></p>
+
+A JavaScript component for creating watermarks with web technologies supported above IE11+. For more details around browsers compatibilities, please check the document, ["Web skills for creating watermarks"](https://aleen42.github.io/PersonalWiki/post/create_watermarks_with_canvas/create_watermarks_with_canvas.html).
 
 ### Installation
 
