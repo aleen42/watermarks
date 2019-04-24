@@ -1,0 +1,34 @@
+{
+    "name": "watermarks-js",
+    "version": "1.0.0",
+    "description": "A plugin for creating watermarks with web technologies.",
+    "main": "dist/watermark.dist.js",
+    "scripts": {
+        "prod": "webpack --colors"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/aleen42/watermarks.git"
+    },
+    "keywords": [
+        "watermarks",
+        "JavaScript"
+    ],
+    "author": "Aleen <aleen42@vip.qq.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/aleen42/watermarks/issues"
+    },
+    "homepage": "https://github.com/aleen42/watermarks#readme",
+    "dependencies": {
+        "jquery": "3.4.0"
+    },
+    "devDependencies": {
+        "babel-core": "6.26.2",
+        "babel-loader": "7.1.4",
+        "babel-preset-env": "1.7.0",
+        "babel-preset-es2015": "6.24.1",
+        "webpack": "4.29.6",
+        "webpack-cli": "3.3.0"
+    }
+}
