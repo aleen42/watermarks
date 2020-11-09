@@ -18,8 +18,21 @@ Use the component as a CommonJS module:
 
 ```js
 const Watermarks = require('watermarks-js');
-new Watermarks($('<div>'), {
-    contents: ['Aleen', 'aleen42@vip.qq.com'],   
+new Watermarks(document.createElement('div'), {
+    contents: ['Aleen', 'aleen42@vip.qq.com'],
+    watermarks: {
+        region: { // control the position of watermarks
+            x: 200,
+            y:200,
+            width: 100,
+            height: 100,
+        },
+        align: 'left', // text-align (left by default)
+        alpha: 0.2, // font-alpha (0.2 by default)
+        fontSize: 16, // font-size (16 by default)
+        fontRotate: Math.PI / 4, // font-rotate (-45° by default)
+        lineHeightRatio: 1.5, // line-height (1.5x by default)
+    },
 });
 ```
 
@@ -31,7 +44,7 @@ Or directly used it in browsers as a script:
 ```
 
 ```js
-new Watermarks($('<div>'), {
+new Watermarks(document.createElement('div'), {
     contents: ['Aleen', 'aleen42@vip.qq.com'],   
 });
 ```
