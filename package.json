@@ -20,9 +20,6 @@
         "url": "https://github.com/aleen42/watermarks/issues"
     },
     "homepage": "https://github.com/aleen42/watermarks#readme",
-    "dependencies": {
-        "jquery": "3.5.0"
-    },
     "devDependencies": {
         "babel-core": "6.26.2",
         "babel-loader": "7.1.4",
