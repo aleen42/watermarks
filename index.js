@@ -213,7 +213,7 @@ const Watermarks = window.Watermarks = window.Watermarks || function ($target, p
 
                 const [dx, dy] = [
                     region.width / 2 * (1 - sin * cos) / cos - fw / 2 - region.height / 2 * sin, /** display axis-x value */
-                    (region.height / 2 + region.width / 2) * sin - fh / 2 + fs * cos, /** display asix-y value */
+                    (region.height / 2 + region.width / 2) * sin - fh / 2 + fs * cos, /** display axis-y value */
                 ];
 
                 [
