@@ -21,7 +21,7 @@
     },
     "homepage": "https://github.com/aleen42/watermarks#readme",
     "dependencies": {
-        "jquery": "3.4.0"
+        "jquery": "3.5.0"
     },
     "devDependencies": {
         "babel-core": "6.26.2",
