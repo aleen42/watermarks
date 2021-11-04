@@ -133,7 +133,9 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
                         if (!axisConditions[axis] || (specificAxis && axis !== specificAxis)) return;
 
                         // ensure that moving even distances of ox or oy
-                        let numbers = Math.floor(Math.floor((axis === 'x' ? scrollX : scrollY)[key] / reserved) * reserved / region[axis]);
+                        let numbers = Math.floor(
+                            Math.floor((axis === 'x' ? scrollX : scrollY)[key] / reserved) * reserved / region[axis]
+                        );
                         numbers -= numbers % 2;
 
                         // guarantee that rendering inside the scrollable area
@@ -165,9 +167,10 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
             canvas.style.width = '100%';
             canvas.style.height = '100%';
             canvas.style['background-repeat'] = 'repeat';
-            canvas.style['background-position'] = `${(region.width - region.x) / 2}px ${(region.height - region.y) / 2}px`;
-            region.width = canvas.width = region.x;
-            region.height = canvas.height = region.y;
+            const {x, y} = region;
+            canvas.style['background-position'] = `${(region.width - x) / 2}px ${(region.height - y) / 2}px`;
+            region.width = canvas.width = x;
+            region.height = canvas.height = y;
         }
     };
 
@@ -189,7 +192,7 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
                 // todo: "css" type cannot translate according to even or odd rows
                 context.translate(x + (y / region.y) % 2 * region.width, y);
 
-                params.DEBUG_MODE && context.fillRect(0, 0, params.watermarks.region.width, params.watermarks.region.height);
+                params.DEBUG_MODE && context.fillRect(0, 0, region.width, region.height);
 
                 // todo: need to consider degrees out of the range between 0 and 90 degrees
                 const sita = watermarks.fontRotate;
