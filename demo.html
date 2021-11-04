@@ -1,0 +1,53 @@
+<style>
+    .wrapper {
+        margin-top: 30px;
+        width: 300px;
+        height: 300px;
+        padding: 20px;
+        border: 1px dashed #000;
+        border-radius: 4px;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .wrapper-black {
+        background-color: black;
+        color: white;
+    }
+
+    a {
+        color: #a10000;
+        text-decoration: none;
+    }
+</style>
+<div class="wrapper wrapper-white">
+    <h2>Watermarks</h2>
+    <p>If you are interested in such a skill about creating watermarks, please focus on the <a href="https://github.com/aleen42/watermarks" target="_blank">repository</a>.</p>
+</div>
+
+<div class="wrapper wrapper-black">
+    <h2>Watermarks</h2>
+    <p>If you are interested in such a skill about creating watermarks, please focus on the <a href="https://github.com/aleen42/watermarks" target="_blank">repository</a>.</p>
+</div>
+
+<script src="./index.js"></script>
+<script>
+    const option = {
+        contents: ['Aleen', 'aleen42@vip.qq.com'],
+        watermarks: {
+            region: {
+                x: 200, y:200,
+                width: 100, height: 100,
+            },
+            align: 'left', /** text-align, left by default */
+            alpha: 0.2, /** font-alpha, 0.2 by default */
+            fontSize: 16, /** font-size, 16 by default */
+            fontRotate: Math.PI * 30 / 180, /** font-rotate, -45° by default */
+            lineHeightRatio: 1.5, /** line-height, 1.5x by default */
+        },
+    };
+
+    new Watermarks(document.querySelector('.wrapper-white'), Object.assign(option, {type: 'canvas'}));
+    new Watermarks(document.querySelector('.wrapper-black'), Object.assign(option, {type: 'css'}));
+</script>
+
