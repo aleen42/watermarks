@@ -14,7 +14,7 @@
  *  - Author: aleen42
  *  - Description: main entry of the watermark component
  *  - Create Time: Apr 24th, 2019
- *  - Update Time: Nov 9th, 2020
+ *  - Update Time: Nov 4th, 2021
  *
  */
 
@@ -193,11 +193,11 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
                  *        x  x             xxxxxxx __ fh
                  *      x--x----------
                  *      |x    ow     x
-                 *      | ---------x               dx = ow/2-fw/2+ow/2*(1-cos)/cos-(oh/2+ow/2)*sin
-                 *      | |      x|                   = ow/2*(1-sin*cos)/cos-fw/2-oh/2*sin
+                 *      | ---------x               dx = ow * cos / 2 - oh * sin / 2 - fw / 2
+                 *      | |      x|
                  *      | | x  x  |  oh
                  *      | x  x    |
-                 *      x -x-------                dy = (oh/2+ow/2)*sin-fh/2+fs*cos
+                 *      x -x-------                dy = fs + oh * cos / 2 + ow * sin / 2 - fh / 2
                  *
                  * Note: axis-y need a value of fs * cos to align (https://codepen.io/aleen42/pen/RMXXqv)
                  */
@@ -211,8 +211,8 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
                 ];
 
                 const [dx, dy] = [
-                    region.width / 2 * (1 - sin * cos) / cos - fw / 2 - region.height / 2 * sin, // display axis-x value
-                    (region.height / 2 + region.width / 2) * sin - fh / 2 + fs * cos, // display axis-y value
+                    region.width * cos / 2 - region.height * sin / 2 - fw / 2, // display axis-x value
+                    fs + region.height * cos / 2 + region.width * sin / 2 - fh / 2, // display axis-y value
                 ];
 
                 [

@@ -74,8 +74,8 @@
         double fw = Math.max(w.getFontMetrics().stringWidth(name), w.getFontMetrics().stringWidth(email));
         double fh = fontSize + lineHeight;
 
-        double dx = width / 2 * (1 - sin * cos) / cos - fw / 2 - height / 2 * sin;
-        double dy = (height / 2 + width / 2) * sin - fh / 2 + fontSize * cos;
+        double dx = width * cos / 2 - height * sin / 2 - fw / 2;
+        double dy = fontSize + height * cos / 2 + width * sin / 2 - fh / 2;
 
         // add text overlay to the image
         // draw name
