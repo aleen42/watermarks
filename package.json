@@ -1,10 +1,10 @@
 {
     "name": "watermarks-js",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A plugin for creating watermarks with web technologies.",
     "main": "dist/watermark.dist.js",
     "scripts": {
-        "prod": "webpack --colors"
+        "prepublishOnly": "webpack --colors"
     },
     "repository": {
         "type": "git",
