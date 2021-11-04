@@ -70,6 +70,7 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
     // initiate default params
     params = Object.assign({
         DEBUG_MODE: false,
+        type : 'canvas', // "canvas" | "css", choose "css" for compatible problems like canvas size limitation
         watermarks: {
             region: {
                 x: 300, // ox, 300 by default
@@ -86,81 +87,93 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
         },
     }, params);
 
+    const type = params.type;
     const watermarks = params.watermarks;
     const region = watermarks.region;
 
     const _init = () => {
-        /**
-         * extend: Do not use following optimization when not passing scrollableElement
-         *
-         * optimization: in order to render in a smaller canvas, rather than creating a huge, there
-         *               are two proposals.
-         * proposal 1 (✗): re-render once scrolling, which only needs a scrollable element's size of canvas
-         * proposal 2 (✓): re-render once scrolling outside whole scrollable element, which needs more than
-         *                 `2ox * 2oy` size of canvas at least to act as a reserved region for re-rendering
-         */
-        const reservedRatio = watermarks.reservedRatio;
-        const [rw, rh] = [
-            SCROLLABLE_MAX_WIDTH > CANVAS_DEFAULT_WIDTH ? reservedRatio * region.x : 0,
-            SCROLLABLE_MAX_HEIGHT > CANVAS_DEFAULT_HEIGHT ? reservedRatio * region.y : 0,
-        ];
-
-        // set the size of the canvas
-        canvas.width = CANVAS_DEFAULT_WIDTH + rw;
-        canvas.height = CANVAS_DEFAULT_HEIGHT + rh;
-
-        // register scroll events
-        const previous = {};
-        const axisConditions = {
-            x: SCROLLABLE_MAX_WIDTH > CANVAS_DEFAULT_WIDTH,
-            y: SCROLLABLE_MAX_HEIGHT > CANVAS_DEFAULT_HEIGHT,
-        };
-
-        if (axisConditions.x || axisConditions.y) {
-            // set position of the canvas
-            const checkPos = specificAxis => {
-                Object.entries({
-                    x: ['left', rw, SCROLLABLE_MAX_WIDTH - canvas.width, 'scrollLeft'],
-                    y: ['top', rh, SCROLLABLE_MAX_HEIGHT - canvas.height, 'scrollTop'],
-                }).forEach(([axis, [property, reserved, limit, key]]) => {
-                    if (!axisConditions[axis] || (specificAxis && axis !== specificAxis)) return;
-
-                    // ensure that moving even distances of ox or oy
-                    let numbers = Math.floor(Math.floor((axis === 'x' ? scrollX : scrollY)[key] / reserved) * reserved / region[axis]);
-                    numbers -= numbers % 2;
-
-                    // guarantee that rendering inside the scrollable area
-                    let val = numbers * region[axis];
-                    val = val >= limit ? limit : val;
-
-                    if (previous[axis] !== val) {
-                        // reset positions when scrolling to specific places
-                        previous[axis] = val;
-                        canvas.style[property] = `${val}px`;
-                    }
-                });
-            };
-
-            checkPos();
-
-            if (scrollX || scrollY) {
-                if (scrollX === scrollY) {
-                    scrollX && scrollX.addEventListener('scroll', checkPos.bind(0, ''));
-                } else {
-                    scrollX && scrollX.addEventListener('scroll', checkPos.bind(0, 'x'));
-                    scrollY && scrollY.addEventListener('scroll', checkPos.bind(0, 'y'));
-                }
-            } else {
-                target.addEventListener('scroll', checkPos.bind(0, ''));
-            }
-        }
-
         // filter empty string
         params.contents = params.contents.filter(content => content.length);
+
+        if (type === 'canvas') {
+
+            /**
+             * extend: Do not use following optimization when not passing scrollableElement
+             *
+             * optimization: in order to render in a smaller canvas, rather than creating a huge, there
+             *               are two proposals.
+             * proposal 1 (✗): re-render once scrolling, which only needs a scrollable element's size of canvas
+             * proposal 2 (✓): re-render once scrolling outside whole scrollable element, which needs more than
+             *                 `2ox * 2oy` size of canvas at least to act as a reserved region for re-rendering
+             */
+            const reservedRatio = watermarks.reservedRatio;
+            const [rw, rh] = [
+                SCROLLABLE_MAX_WIDTH > CANVAS_DEFAULT_WIDTH ? reservedRatio * region.x : 0,
+                SCROLLABLE_MAX_HEIGHT > CANVAS_DEFAULT_HEIGHT ? reservedRatio * region.y : 0,
+            ];
+
+            // set the size of the canvas
+            canvas.width = CANVAS_DEFAULT_WIDTH + rw;
+            canvas.height = CANVAS_DEFAULT_HEIGHT + rh;
+
+            // register scroll events
+            const previous = {};
+            const axisConditions = {
+                x: SCROLLABLE_MAX_WIDTH > CANVAS_DEFAULT_WIDTH,
+                y: SCROLLABLE_MAX_HEIGHT > CANVAS_DEFAULT_HEIGHT,
+            };
+
+            if (axisConditions.x || axisConditions.y) {
+                // set position of the canvas
+                const checkPos = specificAxis => {
+                    Object.entries({
+                        x: ['left', rw, SCROLLABLE_MAX_WIDTH - canvas.width, 'scrollLeft'],
+                        y: ['top', rh, SCROLLABLE_MAX_HEIGHT - canvas.height, 'scrollTop'],
+                    }).forEach(([axis, [property, reserved, limit, key]]) => {
+                        if (!axisConditions[axis] || (specificAxis && axis !== specificAxis)) return;
+
+                        // ensure that moving even distances of ox or oy
+                        let numbers = Math.floor(Math.floor((axis === 'x' ? scrollX : scrollY)[key] / reserved) * reserved / region[axis]);
+                        numbers -= numbers % 2;
+
+                        // guarantee that rendering inside the scrollable area
+                        let val = numbers * region[axis];
+                        val = val >= limit ? limit : val;
+
+                        if (previous[axis] !== val) {
+                            // reset positions when scrolling to specific places
+                            previous[axis] = val;
+                            canvas.style[property] = `${val}px`;
+                        }
+                    });
+                };
+
+                checkPos();
+
+                if (scrollX || scrollY) {
+                    if (scrollX === scrollY) {
+                        scrollX && scrollX.addEventListener('scroll', checkPos.bind(0, ''));
+                    } else {
+                        scrollX && scrollX.addEventListener('scroll', checkPos.bind(0, 'x'));
+                        scrollY && scrollY.addEventListener('scroll', checkPos.bind(0, 'y'));
+                    }
+                } else {
+                    target.addEventListener('scroll', checkPos.bind(0, ''));
+                }
+            }
+        } else if (type === 'css') {
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style['background-repeat'] = 'repeat';
+            canvas.style['background-position'] = `${(region.width - region.x) / 2}px ${(region.height - region.y) / 2}px`;
+            region.width = canvas.width = region.x;
+            region.height = canvas.height = region.y;
+        }
     };
 
     const _draw = () => {
         const context = canvas.getContext('2d');
+        const fontSize = watermarks.fontSize;
 
         // clear at first
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -170,10 +183,11 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
                 context.save();
 
                 context.globalAlpha = watermarks.alpha;
-                context.font = `${watermarks.fontSize}px '微软雅黑'`;
+                context.font = `${fontSize}px '微软雅黑'`;
 
-                // translate pivot when it is an odd row to avoid reduplication
-                context.translate(x + (y / region.y + 1) % 2 * region.width, y);
+                // translate pivot when it is an even row to avoid reduplication
+                // todo: "css" type cannot translate according to even or odd rows
+                context.translate(x + (y / region.y) % 2 * region.width, y);
 
                 params.DEBUG_MODE && context.fillRect(0, 0, params.watermarks.region.width, params.watermarks.region.height);
 
@@ -201,7 +215,6 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
                  *
                  * Note: axis-y need a value of fs * cos to align (https://codepen.io/aleen42/pen/RMXXqv)
                  */
-                const fontSize = watermarks.fontSize;
                 const lineHeight = watermarks.lineHeightRatio * fontSize;
                 const [sin, cos, fw, fs, fh] = [
                     Math.sin(sita), Math.cos(sita),
@@ -229,6 +242,12 @@ const Watermarks = window.Watermarks = window.Watermarks || function (target, pa
                 context.restore();
             }
         }
+
+        if (type === 'css') {
+            // clear at first
+            canvas.style['background-image'] = `url(${canvas.toDataURL()})`;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
     };
 
     // some browsers will need to fill or stroke after canvas has been rendered
@@ -245,4 +264,4 @@ Object.assign(Watermarks.prototype, {
     },
 });
 
-module.exports = Watermarks;
+typeof module === 'undefined' || (module.exports = Watermarks);
