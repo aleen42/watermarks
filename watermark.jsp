@@ -1,6 +1,3 @@
-<c:set var="name" value="Aleen" />
-<c:set var="email" value="aleen42@vip.qq.com" />
-
 <%@ page import="javax.imageio.ImageIO,
                  java.awt.image.BufferedImage,
                  java.awt.Graphics2D,
@@ -11,9 +8,11 @@
                  java.awt.Shape,
                  java.awt.BasicStroke,
                  java.awt.geom.AffineTransform,
-                 java.awt.RenderingHints" %>
+                 java.awt.RenderingHints,
+                 java.util.*" %>
+
 <%!
-    private void draw(String text, int x, int y, Font font, Graphics2D g2) {
+    private void draw(String text, int x, int y, Font font, Graphics2D g2, Color color) {
         BasicStroke outlineStroke = new BasicStroke(2.0f);
 
         AffineTransform originalTransform = g2.getTransform();
@@ -36,7 +35,7 @@
         g2.setStroke(outlineStroke);
         g2.draw(textShape); // draw outline
 
-        g2.setColor(Color.BLACK);
+        g2.setColor(color);
         g2.fill(textShape); // fill the shape
 
         // Restore
@@ -47,49 +46,89 @@
 
 <%
     try {
-        double width = 200;
-        double height = 200;
+        List<Map<String, Object>> contents = Arrays.asList(
+                new HashMap<String, Object>() {{
+                    put("text", "Aleen");
+                    put("font", new Font(null, Font.PLAIN, 18));
+                }},
+                new HashMap<String, Object>() {{
+                    put("text", "aleen42@vip.qq.com");
+                }}
+        );
 
-        String name = (String) pageContext.getAttribute("name");
-        String email = (String) pageContext.getAttribute("email");
+        Map<String, Object> setting = new HashMap<String, Object>() {{
+            put("color", "#000");
+            put("degree", 12);
+            put("alpha", 10);
+            put("gapX", 120); // the distance between each watermark on the X pilot
+            put("gapY", 90);
+        }};
 
-        BufferedImage watermarked = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);
-        // initializes necessary graphic properties
-        Graphics2D w = (Graphics2D) watermarked.getGraphics();
-
-        float alpha = 0.2f;
-        double sita = Math.PI / 4;
-        int fontSize = 14;
-
-        AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
-        w.rotate(-sita);
-        w.setComposite(alphaChannel);
-        Font font = new Font("Arial", Font.PLAIN, fontSize);
-        w.setFont(font);
-
-        double lineHeight = 1.5 * fontSize;
-
-        double sin = Math.sin(sita);
+        float alpha = (int) setting.get("alpha") / 100f;
+        double sita = Math.PI / (180f / (int) setting.get("degree"));
         double cos = Math.cos(sita);
-        double fw = Math.max(w.getFontMetrics().stringWidth(name), w.getFontMetrics().stringWidth(email));
-        double fh = fontSize + lineHeight;
+        double sin = Math.sin(sita);
+        double gapX = (int) setting.get("gapX");
+        double gapY = (int) setting.get("gapY"); // the distance between each watermark on the Y pilot
+        Font defaultFont = new Font(null, Font.PLAIN, 14);
+        String color = setting.get("color").toString();
 
-        double dx = width * cos / 2 - height * sin / 2 - fw / 2;
-        double dy = fontSize + height * cos / 2 + width * sin / 2 - fh / 2;
+        BufferedImage watermarked;
+        Graphics2D w;
 
-        // add text overlay to the image
-        // draw name
-        draw(name, (int) dx, (int) dy, font, w);
-        // draw email
-        draw(email, (int) dx, (int) (dy + lineHeight), font, w);
+        // Calculate the size of a rendered watermark
+        watermarked = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+        w = (Graphics2D) watermarked.getGraphics();
+        double fw = 0;
+        double fh = 0;
+        for (int i = 0; i < contents.size(); i++) {
+            Map<String, Object> content = contents.get(i);
+            Font f = content.get("font") != null ? (Font) content.get("font") : defaultFont;
+            // 1.5x line height
+            fh += (i == 0 ? 1 : 1.5) * f.getSize();
+            w.setFont(f);
+            fw = Math.max(fw, w.getFontMetrics().stringWidth(content.get("text").toString()));
+        }
+        w.dispose();
 
-        response.reset(); //返回在流中被标记过的位置
+        // Calculate the size of the rendered image
+        double vw = fh * sin + fw * cos + gapX;
+        double vh = fh * cos + fw * sin + gapY;
+        double[][] positions = {{vw / 2, 0}, {0, vh}}; // even distribution
+        double maxViewX = 0;
+        double maxViewY = 0;
+        for (double[] position : positions) {
+            maxViewX = Math.max(maxViewX, position[0]);
+            maxViewY = Math.max(maxViewY, position[1]);
+        }
+
+        watermarked = new BufferedImage((int) (maxViewX + vw), (int) (maxViewY + vh), BufferedImage.TYPE_INT_ARGB);
+        w = (Graphics2D) watermarked.getGraphics();
+        w.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+        w.rotate(-sita);
+
+        // Start to draw
+        for (double[] position : positions) {
+            double px = position[0];
+            double py = position[1];
+            double dx = vw * cos / 2 - vh * sin / 2 - fw / 2 + px * cos - py * sin;
+            double dy = vh * cos / 2 + vw * sin / 2 - fh / 2 + py * cos + px * sin;
+            for (int i = 0; i < contents.size(); i++) {
+                Map<String, Object> content = contents.get(i);
+                Font f = content.get("font") != null ? (Font) content.get("font") : defaultFont;
+                dy += (i == 0 ? 1 : 1.5) * f.getSize();
+                w.setFont(f);
+                draw(content.get("text").toString(), (int) dx, (int) dy, f, w, Color.decode(color));
+            }
+        }
+
+        response.reset();
         response.setContentType("image/png");
         ImageIO.write(watermarked, "png", response.getOutputStream());
         w.dispose();
 
         out.clear();
-        out = pageContext.pushBody();
+        pageContext.pushBody();
     } catch (Exception e) {
         e.printStackTrace();
     }
