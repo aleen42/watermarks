@@ -40,7 +40,7 @@ Or directly used it in browsers as a script:
 
 ```html
 <script type="text/javascript"
-    src="https://github.com/aleen42/watermarks/releases/download/1.0.0/watermark.dist.js" />
+    src="https://github.com/aleen42/watermarks/releases/download/1.0.3/watermark.dist.js" />
 ```
 
 ```js
